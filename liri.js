@@ -6,9 +6,11 @@ const moment = require("moment")
 
 //const spotify = new Spotify(keys.spotify)
 
-axios.get(`https://rest.bandsintown.com/artists/skrillex/events?app_id=codingbootcamp`)
-  .then(({ data, datetime }) => {
-    console.log(data)
+const [, , , artist] = process.argv
+
+axios.get(`https://rest.bandsintown.com/artists/${artist}/events?app_id=codingbootcamp`)
+  .then(({ data }) => {
+    //console.log(data)
     data.forEach(venueObj => {
       const { venue: { name, city, region, country }, datetime } = venueObj
       console.log(`
@@ -19,3 +21,4 @@ axios.get(`https://rest.bandsintown.com/artists/skrillex/events?app_id=codingboo
     })
   })
   .catch(e => console.log(e))
+
