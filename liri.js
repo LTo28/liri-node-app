@@ -5,38 +5,49 @@ const axios = require("axios")
 const moment = require("moment")
 const Spotify = require('node-spotify-api');
 
-//import spotify from './keys.js'
+const spotify = new Spotify(keys.spotify)
 
-const [, , , artist] = process.argv
+const [, , api, a] = process.argv
 
-axios.get(`https://rest.bandsintown.com/artists/${artist}/events?app_id=codingbootcamp`)
-  .then(({ data }) => {
-    //console.log(data)
-    data.forEach(venueObj => {
-      const { venue: { name, city, region, country }, datetime } = venueObj
-      console.log(`
+switch (api) {
+  case 'concert-this':
+    bands(a)
+    break
+  case 'spotify-this-song':
+    music(a)
+    break
+}
+
+function bands(a) {
+  axios.get(`https://rest.bandsintown.com/artists/${a}/events?app_id=codingbootcamp`)
+    .then(({ data }) => {
+      //console.log(data)
+      data.forEach(venueObj => {
+        const { venue: { name, city, region, country }, datetime } = venueObj
+        console.log(`
         Name: ${name}
         Location: ${city} ${region} ${country}
         When: ${moment(datetime).format('MM/DD/YYYY hh:mm a')}
       `)
+      })
     })
-  })
-  .catch(e => console.log(e))
+    .catch(e => console.log(e))
+}
 
 
-
-const spotify = new Spotify(keys.spotify)
-
-spotify
-  .search({ type: 'track', query: 'bohemian trapsody', limit: 1 })
-  .then(({ tracks: { items } }) => {
-    items.forEach(itemObj => {
-      const { album, artists, name, external_urls } = itemObj
-      console.log(album.name)
-      console.log(artists)
-      console.log(name)
-      console.log(external_urls)
-
+function music(a) {
+  spotify
+    .search({ type: 'track', query: `${a}`, limit: 5 })
+    .then(({ tracks: { items } }) => {
+      items.forEach(itemObj => {
+        const { album, name, artists, external_urls: { spotify } } = itemObj
+        console.log(`
+      Artist(s): ${artists[0].name}
+      Song: ${name}
+      Link: ${spotify}
+      Album: ${album.name}
+      `)
+      })
     })
-  })
-  .catch(e => console.log(e))
+    .catch(e => console.log(e))
+}
